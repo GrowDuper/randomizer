@@ -26,14 +26,8 @@ local eggChances = {
     ["Paradise Egg"] = { ["Ostrich"] = 43, ["Peacock"] = 33, ["Capybara"] = 24, ["Scarlet Macaw"] = 3, ["Mimic Octopus"] = 0 },
     ["Premium Night Egg"] = { ["Hedgehog"] = 50, ["Mole"] = 26, ["Frog"] = 14, ["Echo Frog"] = 10 },
     ["Dinosaur Egg"] = { ["Raptor"] = 35, ["Triceratops"] = 32.5, ["Stegosaurus"] = 28, ["Pterodactyl"] = 3, ["Brontosaurus"] = 1, ["T-Rex"] = 0 },
-    ["Primal Egg"] = {
-        ["Parasaurolophus"] = 34,
-        ["Iguanodon"] = 32.5,
-        ["Pachycephalosaurus"] = 28,
-        ["Dilophosaurus"] = 3,
-        ["Ankylosaurus"] = 1,
-        ["Spinosaurus"] = 0
-    }
+    ["Primal Egg"] = { ["Parasaurolophus"] = 34, ["Iguanodon"] = 32.5, ["Pachycephalosaurus"] = 28, ["Dilophosaurus"] = 3, ["Ankylosaurus"] = 1, ["Spinosaurus"] = 0 },
+    ["Zen Egg"] = { ["Shiba Inu"] = 34, ["Nihonzaru"] = 32.5, ["Tanuki"] = 28, ["Tanchozuru"] = 3, ["Kappa"] = 1, ["Kitsune"] = 0 }
 }
 
 local realESP = {
@@ -45,7 +39,7 @@ local realESP = {
 }
 
 local divinePets = {
-    "Raccoon", "Dragon Fly", "Queen Bee", "Red Fox", "Disco Bee", "Butterfly", "T-Rex", "Spinosaurus"
+    "Raccoon", "Dragon Fly", "Queen Bee", "Red Fox", "Disco Bee", "Butterfly", "T-Rex", "Kitsune", "Spinosaurus"
 }
 
 _G.displayedEggs = {}
@@ -72,19 +66,21 @@ function _G.getNonRepeatingRandomPet(eggName, lastPet)
     return pool[1] and pool[1].pet or nil
 end
 
-local function createEspGui(object, labelText, isDivine)
+local hue = 0 -- Add this at the top-level with other variables
+
+local function createEspGui(object, labelText)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "PetESP"
     billboard.Adornee = object:FindFirstChildWhichIsA("BasePart") or object.PrimaryPart or object
-    billboard.Size = UDim2.new(0, 220, 0, 60)
+    billboard.Size = UDim2.new(0, 160, 0, 40)
     billboard.StudsOffset = Vector3.new(0, 2.8, 0)
     billboard.AlwaysOnTop = true
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.TextColor3 = isDivine and COLOR_YELLOW or COLOR_PINK
-    label.TextStrokeTransparency = 0.5
+    label.TextColor3 = Color3.new(1, 1, 1) -- will be animated
+    label.TextStrokeTransparency = 0.3
     label.TextStrokeColor3 = COLOR_PURPLE
     label.TextScaled = true
     label.Font = Enum.Font.GothamBold
@@ -94,6 +90,7 @@ local function createEspGui(object, labelText, isDivine)
     billboard.Parent = object
     return billboard
 end
+
 
 local function addESP(egg)
     if egg:GetAttribute("OWNER") ~= LocalPlayer.Name then return end
@@ -106,7 +103,7 @@ local function addESP(egg)
         labelText = eggName
     else
         firstPet = _G.getNonRepeatingRandomPet(eggName, nil)
-        labelText = eggName .. " | " .. (firstPet or "?") .. (table.find(divinePets, firstPet) and " ✨" or "")
+        labelText = (firstPet or "?") .. (table.find(divinePets, firstPet) and " ✨" or "")
     end
 
     local isDivine = firstPet and table.find(divinePets, firstPet) ~= nil
@@ -247,18 +244,25 @@ rerollBtn.MouseButton1Click:Connect(function()
     if now - lastRerollTime < cooldown then return end
     lastRerollTime = now
 
-    for objectId, data in pairs(_G.displayedEggs or {}) do
-        local pet = _G.getNonRepeatingRandomPet(data.eggName, data.lastPet)
-        if pet and data.label then
-            local isDivine = table.find(divinePets, pet) ~= nil
-            data.label.Text = data.eggName .. " | " .. pet .. (isDivine and " ✨" or "")
-            data.label.TextColor3 = isDivine and COLOR_YELLOW or COLOR_PINK
-            data.lastPet = pet
-        end
+for objectId, data in pairs(_G.displayedEggs or {}) do
+    local pet = _G.getNonRepeatingRandomPet(data.eggName, data.lastPet)
+    if pet and data.label then
+        local isDivine = table.find(divinePets, pet) ~= nil
+        data.label.Text = pet .. (isDivine and " ✨" or "") -- ✅ FIXED
+        data.label.TextColor3 = isDivine and COLOR_YELLOW or COLOR_PINK
+        data.lastPet = pet
     end
+end
+
 end)
 
 RunService.RenderStepped:Connect(function()
+    hue = (hue + 0.005) % 1
+    for _, data in pairs(_G.displayedEggs) do
+        if data.label then
+            data.label.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        end
+    end
     updateRerollButton()
 end)
 
