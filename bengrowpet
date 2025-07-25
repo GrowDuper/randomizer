@@ -206,7 +206,7 @@ rerollBtn.Size = UDim2.new(1, -20, 0, buttonHeight)
 rerollBtn.Position = UDim2.new(0, 10, 0, startY + (buttonHeight + spacing))
 rerollBtn.BackgroundColor3 = COLOR_PINK
 rerollBtn.TextColor3 = COLOR_YELLOW
-rerollBtn.Text = "[B] Reroll Display"
+rerollBtn.Text = "[B] Reroll Eggs"
 rerollBtn.Font = Enum.Font.Gotham
 rerollBtn.TextSize = 16
 Instance.new("UICorner", rerollBtn).CornerRadius = UDim.new(0, 12)
@@ -279,7 +279,7 @@ RunService.RenderStepped:Connect(function()
         rerollBtn.Text = string.format("[B] Reroll (%.1f)", math.max(0, timeLeft))
         rerollBtn.BackgroundColor3 = COLOR_PRIMARY
     else
-        rerollBtn.Text = "[B] Reroll Display"
+        rerollBtn.Text = "[B] Reroll Eggs"
         rerollBtn.BackgroundColor3 = COLOR_PINK
     end
 end)
